@@ -1,8 +1,3 @@
-/* TODO:
-   Read call arguments using std::env::args
-
-*/
-
 use std::env;
 
 fn main() {
