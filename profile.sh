@@ -50,15 +50,18 @@ if [[ "$TYPE" == "cov" ]]; then
     -Xdemangler=rustfilt \
     -instr-profile=$PROFDATA_FILE \
     -output-dir=$OUTPUT_DIR \
-    -format=html \
+    -format=text \
     -ignore-filename-regex='.*\.cargo.*' \
     -show-instantiations \
     -show-expansions \
     -show-line-counts-or-regions \
     target/debug/$BINARY_NAME
+  rm -f $PROFRAW_FILE
+  rm -f $PROFDATA_FILE
 elif [[ "$TYPE" == "grcov" ]]; then
   cargo +nightly run -- $RUN_OPTIONS
   grcov $PROFRAW_FILE --binary-path target/debug -s . -t html --branch --ignore-not-existing -o $OUTPUT_DIR
+  rm -f $PROFRAW_FILE
 else
   echo "Invalid type: $TYPE"
   exit 1

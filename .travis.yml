@@ -15,7 +15,9 @@ jobs:
         - cargo install grcov
       script:
         - rustup component add llvm-tools-preview
-        - ./profile.sh -t grcov -- -f test_clippings.txt
+        - ./profile.sh -t cov -- -f test_clippings.txt
+      after_success:
+        - bash <(curl -s https://codecov.io/bash) -s ./profile
   allow_failures:
     - rust: nightly
   fast_finish: true
