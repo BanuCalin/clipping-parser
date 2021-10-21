@@ -15,7 +15,7 @@ jobs:
         - curl -L https://github.com/mozilla/grcov/releases/latest/download/grcov-linux-x86_64.tar.bz2 | tar jxf -
       script:
         - rustup component add llvm-tools-preview
-        - profile.sh -- -f test_clippings.txt
+        - ./profile.sh -- -f test_clippings.txt
   allow_failures:
     - rust: nightly
   fast_finish: true
