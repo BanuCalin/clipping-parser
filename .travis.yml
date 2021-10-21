@@ -12,9 +12,11 @@ jobs:
   include:
     - rust: nightly
       before_install:
-        - cargo install grcov
-      script:
         - rustup component add llvm-tools-preview
+        - cargo install grcov
+        - cargo install rustfilt
+        - cargo install cargo-binutils
+      script:
         - ./profile.sh -t cov -- -f test_clippings.txt
       after_success:
         - bash <(curl -s https://codecov.io/bash) -s ./profile
