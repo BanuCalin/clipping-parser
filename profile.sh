@@ -60,7 +60,7 @@ if [[ "$TYPE" == "cov" ]]; then
   rm -f $PROFDATA_FILE
 elif [[ "$TYPE" == "grcov" ]]; then
   cargo +nightly run -- $RUN_OPTIONS
-  grcov $PROFRAW_FILE --binary-path target/debug -s . -t html --branch --ignore-not-existing -o $OUTPUT_DIR
+  grcov $PROFRAW_FILE --binary-path target/debug/ -s . -t lcov --branch --ignore-not-existing -o $OUTPUT_DIR/lcov.txt
   rm -f $PROFRAW_FILE
 else
   echo "Invalid type: $TYPE"
