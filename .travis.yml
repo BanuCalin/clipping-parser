@@ -17,9 +17,9 @@ jobs:
         - cargo install rustfilt
         - cargo install cargo-binutils
       script:
-        - ./profile.sh -t grcov -- -f test_clippings.txt
+        - ./profile.sh -t cov -f text -- -f test_clippings.txt
       after_success:
-        - bash <(curl -s https://codecov.io/bash) -f ./profile/lcov.info
+        - ARRAY=($(find ./profile -type f -follow | tr ' ' '\n')); for i in "${ARRAY[@]}"; do bash <(curl -s https://codecov.io/bash) -f $i; done
   allow_failures:
     - rust: nightly
   fast_finish: true

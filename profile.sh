@@ -1,9 +1,10 @@
 #!/bin/bash
 
 OUTPUT_DIR="profile"
-TYPE="grcov"
-
+TOOL="grcov"
+FORMAT="html"
 RUN_OPTIONS=""
+
 while [[ $# -gt 0 ]]; do
   key="$1"
   case $key in
@@ -12,10 +13,15 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift # past value
       ;;
-    -t|--type)
-      TYPE="$2"
+    -t|--tool)
+      TOOL="$2"
       shift # past argument
       shift # past value
+      ;;
+    -f|--format)
+      FORMAT="$2"
+      shift
+      shift
       ;;
     --)    # unknown option
       shift
@@ -43,14 +49,14 @@ mkdir $OUTPUT_DIR
 
 BINARY_NAME=$(cargo +nightly metadata --no-deps --format-version 1 | sed 's/.*,"name":"\([a-zA-Z0-9_-]*\)","src_path":.*/\1/')
 
-if [[ "$TYPE" == "cov" ]]; then
+if [[ "$TOOL" == "cov" ]]; then
   cargo +nightly run -- $RUN_OPTIONS
   cargo +nightly profdata -- merge -sparse $PROFRAW_FILE -o $PROFDATA_FILE
   cargo +nightly cov -- show \
     -Xdemangler=rustfilt \
     -instr-profile=$PROFDATA_FILE \
     -output-dir=$OUTPUT_DIR \
-    -format=text \
+    -format=$FORMAT \
     -ignore-filename-regex='.*\.cargo.*' \
     -show-instantiations \
     -show-expansions \
@@ -58,11 +64,20 @@ if [[ "$TYPE" == "cov" ]]; then
     target/debug/$BINARY_NAME
   rm -f $PROFRAW_FILE
   rm -f $PROFDATA_FILE
-elif [[ "$TYPE" == "grcov" ]]; then
+elif [[ "$TOOL" == "grcov" ]]; then
   cargo +nightly run -- $RUN_OPTIONS
-  grcov $PROFRAW_FILE --binary-path target/debug/ -s . -t lcov --branch --ignore-not-existing -o $OUTPUT_DIR/lcov.info
+
+  if [[ "$FORMAT" == "lcov" ]]; then
+    OUTPUT_DIR=$OUTPUT_DIR/lcov.info
+  fi
+
+  if [[ "$FORMAT" == "cobertura" ]]; then
+      OUTPUT_DIR=$OUTPUT_DIR/cobertura.info
+  fi
+
+  grcov $PROFRAW_FILE --binary-path target/debug/ -s . -t $FORMAT --branch --ignore-not-existing -o $OUTPUT_DIR
   rm -f $PROFRAW_FILE
 else
-  echo "Invalid type: $TYPE"
+  echo "Invalid type: $TOOL"
   exit 1
 fi
