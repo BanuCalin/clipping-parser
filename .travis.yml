@@ -17,7 +17,7 @@ jobs:
         - cargo install rustfilt
         - cargo install cargo-binutils
       script:
-        - ./profile.sh -t cov -- -f test_clippings.txt
+        - ./profile.sh -t grcov -- -f test_clippings.txt
       after_success:
         - bash <(curl -s https://codecov.io/bash) -f ./profile/lcov.info
   allow_failures:
