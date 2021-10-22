@@ -1,15 +1,16 @@
 #!/bin/bash
 
-OUTPUT_DIR="profile"
+OUTPUT="profile"
 TOOL="grcov"
 FORMAT="html"
 RUN_OPTIONS=""
+CLEAN=0
 
 while [[ $# -gt 0 ]]; do
   key="$1"
   case $key in
     -o|--output)
-      OUTPUT_DIR="$2"
+      OUTPUT="$2"
       shift # past argument
       shift # past value
       ;;
@@ -20,14 +21,18 @@ while [[ $# -gt 0 ]]; do
       ;;
     -f|--format)
       FORMAT="$2"
-      shift
+      shift # past argument
+      shift # past value
+      ;;
+    -c|--clean)
+      CLEAN=1;
       shift
       ;;
     --)    # unknown option
-      shift
+      shift # past argument
       while [[ $# -gt 0 ]]; do
         RUN_OPTIONS+="$1 " # save it in an array for later
-        shift
+        shift # past value
       done
       ;;
     *)
@@ -37,15 +42,15 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-PROFRAW_FILE=$OUTPUT_DIR/data.profraw
-PROFDATA_FILE=$OUTPUT_DIR/data.profdata
+PROFRAW_FILE=$OUTPUT/data.profraw
+PROFDATA_FILE=$OUTPUT/data.profdata
 
 export LLVM_PROFILE_FILE=$PROFRAW_FILE
 export RUSTFLAGS="-Z instrument-coverage"
 
-rm -rf $OUTPUT_DIR
-mkdir $OUTPUT_DIR
-#cargo clean
+if [ $CLEAN -ne 0 ]; then
+  cargo +nightly clean
+fi
 
 BINARY_NAME=$(cargo +nightly metadata --no-deps --format-version 1 | sed 's/.*,"name":"\([a-zA-Z0-9_-]*\)","src_path":.*/\1/')
 
@@ -55,7 +60,7 @@ if [[ "$TOOL" == "cov" ]]; then
   cargo +nightly cov -- show \
     -Xdemangler=rustfilt \
     -instr-profile=$PROFDATA_FILE \
-    -output-dir=$OUTPUT_DIR \
+    -output-dir=$OUTPUT \
     -format=$FORMAT \
     -ignore-filename-regex='.*\.cargo.*' \
     -show-instantiations \
@@ -68,14 +73,14 @@ elif [[ "$TOOL" == "grcov" ]]; then
   cargo +nightly run -- $RUN_OPTIONS
 
   if [[ "$FORMAT" == "lcov" ]]; then
-    OUTPUT_DIR=$OUTPUT_DIR/lcov.info
+    OUTPUT=$OUTPUT/lcov.info
   fi
 
   if [[ "$FORMAT" == "cobertura" ]]; then
-      OUTPUT_DIR=$OUTPUT_DIR/cobertura.info
+    OUTPUT=$OUTPUT/cobertura.info
   fi
 
-  grcov $PROFRAW_FILE --binary-path target/debug/ -s . -t $FORMAT --branch --ignore-not-existing -o $OUTPUT_DIR
+  grcov $PROFRAW_FILE --binary-path target/debug/ -s . -t $FORMAT --branch --ignore-not-existing -o $OUTPUT
   rm -f $PROFRAW_FILE
 else
   echo "Invalid type: $TOOL"
