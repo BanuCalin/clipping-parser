@@ -9,4 +9,3 @@ license-file = "./LICENCE"
 
 [dependencies]
 clap = "2.33.3"
-regex = "1.5.4"
