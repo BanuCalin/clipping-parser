@@ -1,6 +1,7 @@
 #!/bin/bash
 
 OUTPUT="profile"
+TEST=0
 TOOL="grcov"
 FORMAT="html"
 RUN_OPTIONS=""
@@ -26,6 +27,11 @@ while [[ $# -gt 0 ]]; do
       ;;
     -c|--clean)
       CLEAN=1;
+      shift
+      ;;
+    -e|--test)
+      CLEAN=1;
+      TEST=1;
       shift
       ;;
     --)    # unknown option
@@ -55,7 +61,12 @@ fi
 BINARY_NAME=$(cargo +nightly metadata --no-deps --format-version 1 | sed 's/.*,"name":"\([a-zA-Z0-9_-]*\)","src_path":.*/\1/')
 
 if [[ "$TOOL" == "cov" ]]; then
-  cargo +nightly run -- $RUN_OPTIONS
+  if [ $TEST -eq 1 ]; then
+    cargo +nightly test
+  else
+    cargo +nightly test -- $RUN_OPTIONS
+  fi
+
   cargo +nightly profdata -- merge -sparse $PROFRAW_FILE -o $PROFDATA_FILE
   cargo +nightly cov -- show \
     -Xdemangler=rustfilt \
@@ -70,7 +81,11 @@ if [[ "$TOOL" == "cov" ]]; then
   rm -f $PROFRAW_FILE
   rm -f $PROFDATA_FILE
 elif [[ "$TOOL" == "grcov" ]]; then
-  cargo +nightly run -- $RUN_OPTIONS
+  if [ $TEST -eq 1 ]; then
+    cargo +nightly test
+  else
+    cargo +nightly test -- $RUN_OPTIONS
+  fi
 
   if [[ "$FORMAT" == "lcov" ]]; then
     OUTPUT=$OUTPUT/lcov.info

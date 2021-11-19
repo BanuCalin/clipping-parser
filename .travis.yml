@@ -17,9 +17,11 @@ jobs:
         - cargo install rustfilt
         - cargo install cargo-binutils
       script:
-        - ./profile.sh -t grcov -f lcov -o ./profile -- -f test_clippings.txt
+        - ./profile.sh -e -t grcov -f lcov -o ./profile_test -- -f test_clippings.txt
+        - ./profile.sh -t grcov -f lcov -o ./profile_run -- -f test_clippings.txt
       after_success:
-        - bash <(curl -s https://codecov.io/bash) -f ./profile/lcov.info
+        - bash <(curl -s https://codecov.io/bash) -f ./profile_test/lcov.info
+        - bash <(curl -s https://codecov.io/bash) -f ./profile_run/lcov.info
   allow_failures:
     - rust: nightly
   fast_finish: true
