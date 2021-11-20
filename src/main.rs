@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 mod Parser;
 
 extern crate clap;
@@ -5,7 +7,6 @@ extern crate clap;
 use clap::{Arg, App};
 use std::fs::File;
 use std::io::{BufReader, Read, Error, Write, BufWriter};
-use std::ops::Add;
 
 fn read_input_file(file_path: &str) -> Result<String, Error> {
     let mut buf = String::new();
@@ -86,7 +87,7 @@ fn main() {
                     let directory = matches.value_of("output").unwrap();
                     file_name = format!("{}/{} - {}", directory, author, title);
                     println!("{}", file_name);
-                    let mut file = match File::create(file_name) {
+                    let file = match File::create(file_name) {
                         Ok(file) => file,
                         Err(err) => {
                             println!("Error opening output file: {}", err);
