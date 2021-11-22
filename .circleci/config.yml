@@ -6,5 +6,26 @@ jobs:
       - image: banucalin/clipping-parser-image:latest
     steps:
       - checkout
-      - run: cargo --version
-      - run: rustup show
+      - run: cargo build --release
+      - save_cache:
+          key: cargo-key-{{ checksum "Cargo.lock" }}
+          paths:
+            - /usr/local/cargo
+  test:
+    docker:
+      - image: banucalin/clipping-parser-image:latest
+    steps:
+      - restore_cache:
+          keys:
+            - cargo-key-{{ checksum "Cargo.lock" }}
+            - cargo-key-
+      - checkout
+      - run: cargo test
+
+workflows:
+  build_and_test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
