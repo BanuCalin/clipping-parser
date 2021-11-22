@@ -25,6 +25,11 @@ jobs:
           keys:
             - cargo-key-{{ checksum "Cargo.lock" }}
       - run: cargo test
+      - run: cargo test -- -Z unstable-options --format json --report-time | cargo2junit > results.xml
+      - store_test_results:
+          path: results.xml
+      - store_artifacts:
+          path: results.xml
 
 workflows:
   build_and_test:
