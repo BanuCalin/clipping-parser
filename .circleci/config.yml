@@ -10,16 +10,16 @@ jobs:
       - save_cache:
           key: cargo-key-{{ checksum "Cargo.lock" }}
           paths:
-            - /usr/local/cargo
+            - /usr/local/cargo/
   test:
     docker:
       - image: banucalin/clipping-parser-image:latest
     steps:
+      - checkout
+      - run: cargo generate-lockfile
       - restore_cache:
           keys:
             - cargo-key-{{ checksum "Cargo.lock" }}
-            - cargo-key-
-      - checkout
       - run: cargo test
 
 workflows:
