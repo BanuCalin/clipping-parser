@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: rustlang/rust:nightly-buster-slim
+      - image: banucalin/clipping-parser-image:latest
     steps:
       - checkout
       - run: cargo --version
