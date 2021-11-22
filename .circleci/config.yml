@@ -6,6 +6,10 @@ jobs:
       - image: banucalin/clipping-parser-image:latest
     steps:
       - checkout
+      - run: cargo generate-lockfile
+      - restore_cache:
+          keys:
+            - cargo-key-{{ checksum "Cargo.lock" }}
       - run: cargo build --release
       - save_cache:
           key: cargo-key-{{ checksum "Cargo.lock" }}
