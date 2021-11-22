@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  codecov: codecov/codecov@3.2.2
 
 jobs:
   build:
@@ -24,12 +26,12 @@ jobs:
       - restore_cache:
           keys:
             - cargo-key-{{ checksum "Cargo.lock" }}
-      - run: cargo test
-      - run: cargo test -- -Z unstable-options --format json --report-time | cargo2junit > results.xml
+      - run: ./profile.sh -e -t grcov -f lcov -o ./profile_test
+      - run: cargo test -- -Z unstable-options --format json --report-time | cargo2junit > unit_test_results.xml
       - store_test_results:
-          path: results.xml
+          path: unit_test_results.xml
       - store_artifacts:
-          path: results.xml
+          path: unit_test_results.xml
 
 workflows:
   build_and_test:
@@ -38,3 +40,6 @@ workflows:
       - test:
           requires:
             - build
+          post-steps:
+            - codecov/upload:
+                file: ./profile_test/lcov.info
